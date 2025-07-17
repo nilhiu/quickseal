@@ -1,5 +1,5 @@
-from flask import Flask, jsonify
-
+from flask import Flask
+from routes import routes
 
 app = Flask(__name__)
 
@@ -10,4 +10,5 @@ def index():
 
 
 if __name__ == "__main__":
+    app.register_blueprint(routes)
     app.run(host="0.0.0.0", port=8081, debug=True)
