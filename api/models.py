@@ -1,27 +1,32 @@
-from db import db
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import Integer, Boolean, VARCHAR, ForeignKey
 
 
-class FileShare(db.Model):
-    __tablename__ = "file_shares"
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    is_broadcast = db.Column(db.Boolean, nullable=False)
-    password = db.Column(db.VARCHAR(), nullable=True)
-    files = db.relationship("File", lazy=True)
-
-    def __repr__(self):
-        return f"<FileShare {self.id}>"
+class Model(DeclarativeBase):
+    pass
 
 
-class File(db.Model):
+class File(Model):
     __tablename__ = "files"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    file_share_id = db.Column(
-        db.Integer, db.ForeignKey("file_shares.id"), nullable=False
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    file_share_id: Mapped[int] = mapped_column(
+        ForeignKey("file_shares.id"), nullable=False
     )
-    name = db.Column(db.VARCHAR(), nullable=False)
-    size = db.Column(db.Integer, nullable=False)
+    name: Mapped[str] = mapped_column(VARCHAR(), nullable=False)
+    size: Mapped[int] = mapped_column(Integer, nullable=False)
 
     def __repr__(self):
         return f"<File {self.name}>"
+
+
+class FileShare(Model):
+    __tablename__ = "file_shares"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    is_broadcast: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    password: Mapped[str] = mapped_column(VARCHAR(), nullable=True)
+    files: Mapped[list[File]] = relationship()
+
+    def __repr__(self):
+        return f"<FileShare {self.id}>"
