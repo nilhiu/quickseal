@@ -1,12 +1,12 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from routes import routes
+from db import db
 
 app = Flask(__name__)
 # TODO: Change the DB implementation to Postgres.
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///api.db"
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 
 
