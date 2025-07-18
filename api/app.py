@@ -7,6 +7,8 @@ from models import Model
 app = Flask(__name__)
 # TODO: Change the DB implementation to Postgres.
 app.config["SQLALCHEMY_ENGINES"] = {"default": "sqlite:///api.db"}
+# TODO: Make UPLOAD_PATH customizable via an env var.
+app.config["UPLOAD_PATH"] = "data/"
 db.init_app(app)
 alembic = Alembic(app, metadatas=Model.metadata)
 

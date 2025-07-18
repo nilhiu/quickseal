@@ -1,4 +1,8 @@
-from flask import Blueprint, jsonify
+import os
+from flask import Blueprint, jsonify, request, current_app
+from models import File, FileShare
+from db import db
+
 
 routes = Blueprint("routes", __name__)
 
@@ -6,6 +10,53 @@ routes = Blueprint("routes", __name__)
 @routes.route("/health")
 def healthCheck():
     return jsonify({"health": "ok"})
+
+
+@routes.route("/upload", methods=["POST"])
+def upload():
+    if not request.files:
+        current_app.logger.warning("no files provided in upload request")
+        return jsonify({"error": "no files provided"}), 400
+
+    file_share = FileShare(is_broadcast=True, password=None)
+    db.session.add(file_share)
+    db.session.flush()
+    file_share_dir = current_app.config["UPLOAD_PATH"] + f"{file_share.id}/"
+    os.makedirs(file_share_dir, 660, True)
+    current_app.logger.info(f"file share created: {file_share.id}")
+
+    files = request.files.getlist("files")
+    filenames: list[str] = []
+    try:
+        for file in files:
+            filename = file.filename
+            if filename is None:
+                continue
+            filenames.append(filename)
+
+            f = File(
+                file_share_id=file_share.id, name=filename, size=file.content_length
+            )
+            db.session.add(f)
+            file.save(file_share_dir + filename)
+            current_app.logger.info(f"file created for file share: {file_share.id}")
+    except Exception as e:
+        db.session.rollback()
+        os.rmdir(file_share_dir)
+        current_app.logger.error(f"upload exception occured: {e}")
+        return jsonify({"error": "file upload failed"}), 500
+
+    db.session.commit()
+    current_app.logger.info(f"file share transaction committed: {file_share.id}")
+    return (
+        jsonify(
+            {
+                "file_share": file_share.id,
+                "accepted_files": filenames,
+            }
+        ),
+        201,
+    )
 
 
 @routes.route("/")
