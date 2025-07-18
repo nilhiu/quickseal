@@ -121,8 +121,3 @@ def file_share_file(id, file):
         )
         return jsonify({"error": "file doesn't exist in file share"}), 404
     return send_file(file_path, as_attachment=True), 200
-
-
-@routes.route("/")
-def index():
-    return jsonify({"message": "Hello from Quickseal/api!"})
