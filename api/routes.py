@@ -42,15 +42,15 @@ def upload():
     try:
         for file in files:
             filename = file.filename
+            file_path = file_share_dir + filename
             if filename is None:
                 continue
             filenames.append(filename)
 
-            f = File(
-                file_share_id=file_share.id, name=filename, size=file.content_length
-            )
+            file.save(file_path)
+            file_size = os.path.getsize(file_path)
+            f = File(file_share_id=file_share.id, name=filename, size=file_size)
             db.session.add(f)
-            file.save(file_share_dir + filename)
             current_app.logger.info(f"file created for file share: {file_share.id}")
     except Exception as e:
         db.session.rollback()
