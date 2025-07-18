@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, jsonify, request, current_app
+from sqlalchemy import text
 from models import File, FileShare
 from db import db
 
@@ -8,8 +9,19 @@ routes = Blueprint("routes", __name__)
 
 
 @routes.route("/health")
-def healthCheck():
-    return jsonify({"health": "ok"})
+def health_check():
+    db_health = True
+    try:
+        db.session.execute(text("SELECT 1"))
+    except Exception:
+        db_health = False
+
+    return jsonify(
+        {
+            "api": "ok",
+            "db_conn": "ok" if db_health else "not ok",
+        }
+    )
 
 
 @routes.route("/upload", methods=["POST"])
