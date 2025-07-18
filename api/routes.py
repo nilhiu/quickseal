@@ -8,7 +8,7 @@ from db import db
 routes = Blueprint("routes", __name__)
 
 
-@routes.route("/health")
+@routes.route("/health", methods=["GET"])
 def health_check():
     db_health = True
     try:
