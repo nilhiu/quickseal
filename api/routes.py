@@ -71,6 +71,21 @@ def upload():
     )
 
 
+@routes.route("/file_share", methods=["GET"])
+def broadcast_file_shares():
+    try:
+        file_shares = db.session.scalars(
+            select(FileShare).where(FileShare.is_broadcast)
+        ).all()
+    except Exception as e:
+        current_app.logger.error(f"broadcast_file_share access exception occured: {e}")
+        return (
+            jsonify({"error": "server failed to fetch all broadcast file shares"}),
+            500,
+        )
+    return jsonify({"file_shares": [file_share.id for file_share in file_shares]}), 200
+
+
 # TODO: Add password protected file shares.
 @routes.route("/file_share/<int:id>", methods=["POST"])
 def file_share(id: int):
