@@ -1,6 +1,6 @@
 import os
-from flask import Blueprint, jsonify, request, current_app
-from sqlalchemy import text
+from flask import Blueprint, jsonify, send_file, request, current_app
+from sqlalchemy import text, select
 from models import File, FileShare
 from db import db
 
@@ -69,6 +69,43 @@ def upload():
         ),
         201,
     )
+
+
+# TODO: Add password protected file shares.
+@routes.route("/file_share/<int:id>", methods=["POST"])
+def file_share(id: int):
+    try:
+        file_share = db.session.scalar(select(FileShare).where(FileShare.id == id))
+    except Exception as e:
+        current_app.logger.error(f"file_share access exception occured: {e}")
+        return jsonify({"error": "server failed to fetch file share"}), 500
+
+    if file_share is None:
+        return jsonify({"error": "file share not found"}), 404
+    current_app.logger.info(f"file share accessed: {file_share.id}")
+
+    return (
+        jsonify(
+            {
+                "file_share": file_share.id,
+                "files": [file.name for file in file_share.files],
+                "sizes": [file.size for file in file_share.files],
+            }
+        ),
+        200,
+    )
+
+
+# TODO: Add password protected file shares.
+@routes.route("/file_share/<int:id>/<string:file>", methods=["POST"])
+def file_share_file(id, file):
+    file_path = f"{current_app.config['UPLOAD_PATH']}/{id}/{file}"
+    if not os.path.exists(file_path):
+        current_app.logger.error(
+            f"file request on nonexistent file: {file}, on file share: {id}"
+        )
+        return jsonify({"error": "file doesn't exist in file share"}), 404
+    return send_file(file_path, as_attachment=True), 200
 
 
 @routes.route("/")
