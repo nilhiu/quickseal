@@ -1,5 +1,6 @@
+import io
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, send_file
 import requests
 
 
@@ -24,6 +25,17 @@ def files(share_id: int):
     resp = requests.post(f"{API_URL}/file_share/{share_id}")
     share = resp.json()
     return render_template("files.j2", share_id=share_id, files=share["files"])
+
+
+@app.route("/broadcast/<int:share_id>/<string:filename>")
+def file(share_id, filename):
+    resp = requests.post(f"{API_URL}/file_share/{share_id}/{filename}")
+    return send_file(
+        io.BytesIO(resp.content),
+        mimetype=resp.headers.get("Content-Type"),
+        as_attachment=True,
+        download_name=filename,
+    )
 
 
 if __name__ == "__main__":
