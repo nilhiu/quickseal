@@ -25,6 +25,9 @@ COPY --from=builder --chown=app-user:app-user /app .
 
 ENV PATH="/app/.venv/bin:$PATH"
 
+HEALTHCHECK --interval=2m --timeout=3s --start-period=5s --retries=3 \
+    CMD python3 -c "import http.client; conn = http.client.HTTPConnection('localhost', 8081); conn.request('GET', '/health'); res = conn.getresponse(); exit(0) if res.status == 200 else exit(1)"
+
 EXPOSE 8081
 
 CMD ["flask", "run", "-h", "0.0.0.0", "-p", "8081", "--no-debug"]
