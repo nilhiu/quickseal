@@ -7,10 +7,10 @@
         <section id="broadcast-shares">
             <h2>Broadcast Shares</h2>
             <ul>
-                {% for share in shares %}
+                {% for share_id in share_ids %}
                     <li>
-                        <a href="/broadcast/{{ share.id }}">
-                            <h3>{{ share.id }}</h3>
+                        <a href="/broadcast/{{ share_id }}">
+                            <h3>{{ share_id }}</h3>
                         </a>
                     </li>
                 {% endfor %}

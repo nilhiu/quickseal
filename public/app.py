@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template
+import requests
 
 
 app = Flask(__name__)
@@ -13,12 +14,16 @@ def index():
 
 @app.route("/broadcast")
 def broadcast():
-    return render_template("broadcast.j2", shares=[{"id": "some_id"}])
+    resp = requests.get(f"{API_URL}/file_share")
+    shares = resp.json()
+    return render_template("broadcast.j2", share_ids=shares["file_shares"])
 
 
 @app.route("/broadcast/<int:share_id>")
 def files(share_id: int):
-    return render_template("files.j2", share_id=share_id, files=["file.txt"])
+    resp = requests.post(f"{API_URL}/file_share/{share_id}")
+    share = resp.json()
+    return render_template("files.j2", share_id=share_id, files=share["files"])
 
 
 if __name__ == "__main__":
