@@ -1,7 +1,9 @@
+import os
 from flask import Flask, render_template
 
 
 app = Flask(__name__)
+API_URL = os.environ.get("QUICKSEAL_API_URL")
 
 
 @app.route("/")
@@ -20,4 +22,7 @@ def files(share_id: int):
 
 
 if __name__ == "__main__":
+    if API_URL is None:
+        app.logger.fatal("environmental variable QUICKSEAL_API_URL was not provided")
+        exit(1)
     app.run(host="0.0.0.0", port=8080, debug=True)
