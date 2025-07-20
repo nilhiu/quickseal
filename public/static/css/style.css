@@ -226,29 +226,34 @@ main {
   background-color: var(--foreground-secondary);
 }
 
-#broadcast-shares {
+#broadcast-shares,
+#files-section {
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-#broadcast-shares h2 {
+#broadcast-shares h2,
+#files-section h2 {
   color: var(--foreground-plain);
   font-size: 24px;
   margin-bottom: 18px;
 }
 
-#broadcast-shares ul {
+#broadcast-shares ul,
+#files-section ul {
   width: 80%;
 }
 
-#broadcast-shares ul li {
+#broadcast-shares ul li,
+#files-section ul li {
   width: 100%;
   height: 28px;
 }
 
-#broadcast-shares ul a {
+#broadcast-shares ul a,
+#files-section ul a {
   width: 100%;
   height: 100%;
   border: 2px dashed var(--foreground-primary);
@@ -259,12 +264,14 @@ main {
   transition: color ease 200ms, border-color ease 200ms;
 }
 
-#broadcast-shares ul li h3 {
+#broadcast-shares ul li h3,
+#files-section ul li h3 {
   margin-left: 8px;
   vertical-align: middle;
 }
 
-#broadcast-shares ul a:hover {
+#broadcast-shares ul a:hover,
+#files-section ul a:hover {
   text-decoration: underline;
   border-color: var(--foreground-secondary);
   color: var(--foreground-secondary);
