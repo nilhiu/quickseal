@@ -30,4 +30,4 @@ HEALTHCHECK --interval=2m --timeout=3s --start-period=5s --retries=3 \
 
 EXPOSE 8081
 
-CMD ["flask", "run", "-h", "0.0.0.0", "-p", "8081", "--no-debug"]
+CMD ["gunicorn", "-b", "0.0.0.0:8081", "app:create_app()"]
