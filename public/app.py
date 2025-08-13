@@ -1,6 +1,6 @@
 import io
 import os
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template, send_file, redirect, request
 import requests
 
 
@@ -36,6 +36,20 @@ def file(share_id, filename):
         as_attachment=True,
         download_name=filename,
     )
+
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    files = list(
+        map(
+            lambda f: ("files", (f.filename, f.stream, f.mimetype)),
+            request.files.getlist("files"),
+        )
+    )
+    resp = requests.post(f"{API_URL}/upload", files=files)
+    resp.raise_for_status()
+    data = resp.json()
+    return redirect(f"/broadcast/{data['file_share']}")
 
 
 if __name__ == "__main__":

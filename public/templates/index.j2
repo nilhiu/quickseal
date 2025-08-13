@@ -5,7 +5,7 @@
     {% include "navbar.j2" %}
     <main>
         <section id="file-upload-section">
-            <form action="/upload" method="post">
+            <form action="/upload" method="post" enctype="multipart/form-data">
                 <div id="file-drop-area">
                     <div id="file-drop-area-text">
                         <p>drag_and_drop</p>
