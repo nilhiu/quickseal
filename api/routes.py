@@ -1,3 +1,4 @@
+import base64
 import os
 from flask import Blueprint, jsonify, send_file, request, current_app
 from sqlalchemy import text, select
@@ -26,8 +27,10 @@ def health_check():
 
 @routes.route("/upload", methods=["POST"])
 def upload():
-    if not request.files:
-        current_app.logger.warning("no files provided in upload request")
+    req = request.get_json()
+    files = req["files"]
+    if len(files) == 0:
+        current_app.logger.warning(f"no files provided in upload request: {req}")
         return jsonify({"error": "no files provided"}), 400
 
     file_share = FileShare(is_broadcast=True, password=None)
@@ -37,19 +40,26 @@ def upload():
     os.makedirs(file_share_dir, 660, True)
     current_app.logger.info(f"file share created: {file_share.id}")
 
-    files = request.files.getlist("files")
     filenames: list[str] = []
     try:
         for file in files:
-            filename = file.filename
-            file_path = file_share_dir + filename
-            if filename is None:
+            if file["name"] == "":
                 continue
-            filenames.append(filename)
+            file_path = file_share_dir + file["name"]
+            filenames.append(file["name"])
 
-            file.save(file_path)
-            file_size = os.path.getsize(file_path)
-            f = File(file_share_id=file_share.id, name=filename, size=file_size)
+            binary = base64.b64decode(file["binary"])
+            file_size = len(binary)
+            if file_size > 3 * pow(1024, 2):
+                current_app.logger.error(
+                    f"upload attempt file size: {file_size} > 3 MiB"
+                )
+                return jsonify({"error": f"file '{file['name']}' size too large"}), 400
+
+            with open(file_path, "wb") as f:
+                f.write(binary)
+
+            f = File(file_share_id=file_share.id, name=file["name"], size=file_size)
             db.session.add(f)
             current_app.logger.info(f"file created for file share: {file_share.id}")
     except Exception as e:

@@ -1,3 +1,4 @@
+import base64
 import io
 import os
 from flask import Flask, render_template, send_file, redirect, request
@@ -40,13 +41,18 @@ def file(share_id, filename):
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    files = list(
-        map(
-            lambda f: ("files", (f.filename, f.stream, f.mimetype)),
-            request.files.getlist("files"),
+    req = {
+        "files": list(
+            map(
+                lambda f: {
+                    "name": f.filename,
+                    "binary": base64.b64encode(f.stream.read()).decode(),
+                },
+                request.files.getlist("files"),
+            )
         )
-    )
-    resp = requests.post(f"{API_URL}/upload", files=files)
+    }
+    resp = requests.post(f"{API_URL}/upload", json=req)
     resp.raise_for_status()
     data = resp.json()
     return redirect(f"/broadcast/{data['file_share']}")
